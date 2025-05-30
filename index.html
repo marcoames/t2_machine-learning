@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Music Recommendation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        input {
+            padding: 8px;
+            font-size: 16px;
+            width: 300px;
+        }
+
+        button {
+            padding: 8px 12px;
+            font-size: 16px;
+            margin-left: 8px;
+        }
+
+        .song-card {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        ul {
+            padding-left: 0;
+        }
+
+        li {
+            list-style: none;
+        }
+    </style>
+</head>
+<body>
+    <h2>Enter a Song Name and Artist:</h2>
+    <input type="text" id="songInput" placeholder="Song Name">
+    <input type="text" id="artistInput" placeholder="Artist Name">
+    <button onclick="getRecommendations()">Get Recommendations</button>
+
+    <h3>Selected Song Info:</h3>
+    <div id="selectedSongInfo"></div>
+
+    <h3>Recommended Songs:</h3>
+    <div id="recommendationsList"></div>
+
+    <script>
+        function formatSongDetails(song) {
+            return `
+                <div class="song-card">
+                    <strong>Name:</strong> ${song.name}<br>
+                    <strong>Artists:</strong> ${song.artists}<br>
+                    <strong>Genres:</strong> ${song.genres}<br>
+                    <strong>Year:</strong> ${song.year}<br>
+                </div>
+            `;
+        }
+
+        function getRecommendations() {
+            const songName = document.getElementById('songInput').value;
+            const artistName = document.getElementById('artistInput').value;
+            const infoDiv = document.getElementById('selectedSongInfo');
+            const listDiv = document.getElementById('recommendationsList');
+
+            infoDiv.innerHTML = '';
+            listDiv.innerHTML = '';
+
+            fetch('http://127.0.0.1:5000/recommend', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ song: songName, artist: artistName }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    infoDiv.textContent = data.error;
+                    return;
+                }
+
+                infoDiv.innerHTML = formatSongDetails(data.selected_song);
+                data.recommendations.forEach(rec => {
+                    listDiv.innerHTML += formatSongDetails(rec);
+                });
+            })
+            .catch(err => {
+                infoDiv.textContent = 'Error fetching recommendations.';
+                console.error(err);
+            });
+        }
+    </script>
+</body>
+</html>
