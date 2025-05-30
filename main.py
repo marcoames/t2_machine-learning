@@ -75,7 +75,7 @@ scaler = StandardScaler()
 features_scaled = scaler.fit_transform(df_enriched_clean[feature_cols])
 
 # Agrupamento KMeans para segmentação de músicas
-kmeans = KMeans(n_clusters=20, random_state=42, n_init=10)
+kmeans = KMeans(n_clusters=10, random_state=42, n_init=10)
 clusters = kmeans.fit_predict(features_scaled)
 df_enriched_clean['cluster'] = clusters
 
@@ -89,7 +89,7 @@ def recommend():
     # Busca pela combinação de nome e artista
     row = df_enriched_clean[(df_enriched_clean['name'].str.lower() == song_name.lower()) & (df_enriched_clean['artists'].str.lower() == artist_name.lower())]
     if row.empty:
-        return jsonify({'error': 'Song+Artist not found'}), 404
+        return jsonify({'error': 'Song + Artist not found'}), 404
 
     idx = row.index[0]
     cluster_id = df_enriched_clean.loc[idx, 'cluster']
